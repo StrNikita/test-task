@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as mime from 'mime-types';
+import * as fsPromises from 'fs/promises';
 import * as fs from 'fs';
 import { FileDto } from './dto/file.dto';
 
@@ -12,26 +13,24 @@ export class FilesService {
 
 
     //Gets
-    get(filename: string): FileDto {
-        let path = `${this.fileDir}/${filename}`;
+    async get(filename: string): Promise<FileDto> {
+        const path = `${this.fileDir}/${filename}`;
         if(!fs.existsSync(path))
             throw new NotFoundException(`File ${filename} not found`);
 
         return Object.assign(new FileDto, {
             contentType: mime.lookup(path),
-            data: this.readResource(path)
-        })
+            data: await this.readResource(path),
+        });
     }
 
-    getList(): string[] {
-        return [];
+    async getList(): Promise<string[]> {
+        return fsPromises.readdir(this.fileDir);
     }
 
 
     //Methods
-    readResource(path: string): Buffer {
-        let data: Buffer;
-        fs.readFile(path, (data) => data);
-        return data;
+    async readResource(path: string): Promise<Buffer> {
+        return fsPromises.readFile(path);
     }
 }
