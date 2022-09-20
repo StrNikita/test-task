@@ -11,13 +11,13 @@ export class FilesController {
 
     @Get()
     async getList() {
-        return { files: this.filesService.getList() };
+        return { files: await this.filesService.getList() };
     }
 
 
     @Get(':filename')
     async get(@Res() res, @Param('filename') filename: string) {
-        let file = this.filesService.get(filename);
+        const file = await this.filesService.get(filename);
         res.contentType(file.contentType);
         res.send(file.data);
     }
